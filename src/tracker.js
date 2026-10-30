@@ -14,7 +14,7 @@
 
   function loadConfig() {
     var c = loadJSON(CFG_KEY, {});
-    if (!c.apiBase) c.apiBase = "https://CHANGE-ME.run.app";
+    if (!c.apiBase) c.apiBase = "https://whereami-419371839345.us-east1.run.app";
     if (!c.writeToken) c.writeToken = "";
     if (typeof c.enabled !== "boolean") c.enabled = false;
     return c;
