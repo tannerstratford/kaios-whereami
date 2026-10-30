@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "categories": [
+    "Utilities"
+  ],
+  "apps": [
+    {
+      "folder": "WhereAmI",
+      "name": "WhereAmI",
+      "version": "1.0",
+      "category": "Utilities",
+      "description": "Background location pinger",
+      "sha256": "630c4369671186e99038dce0611f504cb2524cd95def8cadbb6b8430ab59d55d"
+    }
+  ]
+}
