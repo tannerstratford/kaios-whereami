@@ -209,9 +209,32 @@ function MenuView() {
         push(PromptView("Read token", "Paste the shared read token (to view locations)", cfg.readToken, function (val) {
           cfg.readToken = val; Tracker.saveConfig(cfg); pop(); status("Read token saved");
         })); } },
+    { label: "Idle interval", sub: idleLabel(cfg.idleSec) + " when still", run: function () { push(IntervalView()); } },
     { label: "Diagnostics", run: function () { push(DiagView()); } },
     { label: "Exit", run: function () { try { window.close(); } catch (e) {} } },
   ]);
+}
+
+function idleLabel(sec) {
+  return sec % 3600 === 0 ? (sec / 3600) + " hr" : (sec / 60) + " min";
+}
+
+function IntervalView() {
+  var cfg = Tracker.loadConfig();
+  var opts = [[300, "5 min"], [900, "15 min"], [1800, "30 min"], [3600, "1 hour"]];
+  return ListView("Idle interval", opts.map(function (o) {
+    return {
+      label: o[1] + (cfg.idleSec === o[0] ? "  •" : ""),
+      sub: o[0] === 300 ? "most pings, most battery" : o[0] === 3600 ? "fewest pings, least battery" : "",
+      run: function () {
+        cfg.idleSec = o[0];
+        Tracker.saveConfig(cfg);
+        if (cfg.enabled) Tracker.scheduleAlarm(o[0]); // next idle wake uses it
+        pop();
+        status("Idle interval: " + o[1]);
+      },
+    };
+  }));
 }
 
 function DiagView() {

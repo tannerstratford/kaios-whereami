@@ -18,6 +18,7 @@
     if (!c.writeToken) c.writeToken = "";   // this phone sends as device "tanner"
     if (!c.readToken) c.readToken = "";     // to view self + wife
     if (typeof c.enabled !== "boolean") c.enabled = false;
+    if (typeof c.idleSec !== "number") c.idleSec = 900; // default idle: 15 min
     return c;
   }
 
@@ -134,6 +135,8 @@
       var fix = { lat: c.latitude, lon: c.longitude, ts: pos.timestamp || Date.now() };
       var r = Cadence.step(getState(), fix, { manualMotion: !!opts.manualMotion });
       setState(r.state);
+      // idle interval is user-configurable; moving is always 5 min
+      var iv = r.state.mode === "moving" ? Cadence.MOVING_SEC : cfg.idleSec;
       var body = {
         lat: round(fix.lat, 6), lon: round(fix.lon, 6), ts: fix.ts,
         accuracyM: c.accuracy != null ? round(c.accuracy, 1) : undefined,
@@ -144,17 +147,17 @@
       return post(cfg, body).then(function (resp) {
         var result = {
           ts: Date.now(), ok: true, lat: body.lat, lon: body.lon,
-          mode: r.state.mode, moving: r.moving, intervalSec: r.intervalSec,
+          mode: r.state.mode, moving: r.moving, intervalSec: iv,
           battery: body.battery,
         };
         setLast(result);
-        return scheduleAlarm(r.intervalSec).then(function () { return result; });
+        return scheduleAlarm(iv).then(function () { return result; });
       });
     }).catch(function (err) {
       var result = { ts: Date.now(), ok: false, error: err.message };
       setLast(result);
       // keep the schedule alive even on failure so we retry next cycle
-      var iv = getState().mode === "moving" ? Cadence.MOVING_SEC : Cadence.IDLE_SEC;
+      var iv = getState().mode === "moving" ? Cadence.MOVING_SEC : cfg.idleSec;
       return scheduleAlarm(iv).then(function () { throw err; });
     });
   }
