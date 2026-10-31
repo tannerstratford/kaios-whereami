@@ -1,10 +1,10 @@
 // Adaptive ping cadence — plain-JS port of the API's src/lib/cadence.ts.
 // Keep the two in sync: phone and server must agree on what "moving" means.
-// idle = hourly, moving = every 5 min. See that file for the transition table.
+// idle = every 15 min, moving = every 5 min. See that file for the transition table.
 (function (root) {
   "use strict";
 
-  var IDLE_SEC = 3600;
+  var IDLE_SEC = 900;
   var MOVING_SEC = 300;
   var MOVE_M = 250;
   var MOVE_MPS = 1.5;
