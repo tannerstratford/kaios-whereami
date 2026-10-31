@@ -15,9 +15,30 @@
   function loadConfig() {
     var c = loadJSON(CFG_KEY, {});
     if (!c.apiBase) c.apiBase = "https://whereami-419371839345.us-east1.run.app";
-    if (!c.writeToken) c.writeToken = "";
+    if (!c.writeToken) c.writeToken = "";   // this phone sends as device "tanner"
+    if (!c.readToken) c.readToken = "";     // to view self + wife
     if (typeof c.enabled !== "boolean") c.enabled = false;
     return c;
+  }
+
+  // Fetch a person's latest point. device = "tanner" | "wife". Read token.
+  function latest(device) {
+    var cfg = loadConfig();
+    if (!cfg.readToken) return Promise.reject(new Error("set Read token in Menu"));
+    return new Promise(function (resolve, reject) {
+      var r = new XMLHttpRequest({ mozSystem: true });
+      r.open("GET", cfg.apiBase.replace(/\/$/, "") + "/api/latest?device=" + device);
+      r.timeout = 15000;
+      r.setRequestHeader("Authorization", "Bearer " + cfg.readToken);
+      r.onload = function () {
+        if (r.status !== 200) return reject(new Error("HTTP " + r.status));
+        var j = null; try { j = JSON.parse(r.responseText); } catch (e) {}
+        resolve(j && j.point ? j.point : null);
+      };
+      r.onerror = function () { reject(new Error("network")); };
+      r.ontimeout = function () { reject(new Error("timeout")); };
+      r.send();
+    });
   }
   function saveConfig(c) { saveJSON(CFG_KEY, c); }
 
@@ -144,6 +165,6 @@
     loadConfig: loadConfig, saveConfig: saveConfig,
     getState: getState, lastResult: lastResult,
     ping: ping, scheduleAlarm: scheduleAlarm, clearAlarms: clearAlarms,
-    alarmsAvailable: alarmsAvailable,
+    alarmsAvailable: alarmsAvailable, latest: latest,
   };
 }(window));

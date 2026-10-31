@@ -109,6 +109,31 @@ function toggleTracking() {
   }
 }
 
+// View a person's latest fix: fetch it, open Google Maps in the browser.
+function viewLocation(device, label) {
+  if (busy) return;
+  busy = true;
+  status("Finding " + label + "…");
+  Tracker.latest(device).then(function (p) {
+    if (!p) { status(label + ": no location yet", false); return; }
+    openMap(p.lat, p.lon);
+    status(label + " · " + ago(p.ts) + " · ±" + Math.round(p.accuracyM || 0) + "m");
+  }).catch(function (err) {
+    status("View failed: " + err.message, false);
+  }).then(function () { busy = false; });
+}
+
+// Open coords in Google Maps via the KaiOS 'view' web activity (free, no key).
+function openMap(lat, lon) {
+  var url = "https://www.google.com/maps?q=" + lat + "," + lon;
+  try {
+    var a = new WebActivity("view", { type: "url", url: url });
+    a.start().catch(function (e) { status("Couldn't open browser: " + e, false); });
+  } catch (e) {
+    status("No browser activity: " + e.message, false);
+  }
+}
+
 // ---------------------------------------------------------------- menu + prompts
 
 function ListView(title, items) {
@@ -167,6 +192,9 @@ function MenuView() {
     { label: cfg.enabled ? "Stop tracking" : "Start tracking", run: function () { pop(); toggleTracking(); } },
     { label: "Ping now", run: function () { pop(); doPing(false); } },
     { label: "Starting motion", sub: "force 5-min pings", run: function () { pop(); doPing(true); } },
+    { head: true, label: "VIEW ON MAP" },
+    { label: "My location", run: function () { pop(); viewLocation("tanner", "You"); } },
+    { label: "Wife's location", run: function () { pop(); viewLocation("wife", "Wife"); } },
     { head: true, label: "SETTINGS" },
     { label: "API URL", sub: cfg.apiBase, run: function () {
         push(PromptView("API URL", "Base URL of the service, e.g. https://whereami-xxx.run.app", cfg.apiBase, function (val) {
@@ -174,8 +202,12 @@ function MenuView() {
           cfg.apiBase = val.replace(/\/$/, ""); Tracker.saveConfig(cfg); pop(); status("API set");
         })); } },
     { label: "Write token", sub: cfg.writeToken ? "set" : "NOT set", run: function () {
-        push(PromptView("Write token", "Paste the phone's write token", cfg.writeToken, function (val) {
-          cfg.writeToken = val; Tracker.saveConfig(cfg); pop(); status("Token saved");
+        push(PromptView("Write token", "Paste this phone's write token (sends as you)", cfg.writeToken, function (val) {
+          cfg.writeToken = val; Tracker.saveConfig(cfg); pop(); status("Write token saved");
+        })); } },
+    { label: "Read token", sub: cfg.readToken ? "set" : "NOT set", run: function () {
+        push(PromptView("Read token", "Paste the shared read token (to view locations)", cfg.readToken, function (val) {
+          cfg.readToken = val; Tracker.saveConfig(cfg); pop(); status("Read token saved");
         })); } },
     { label: "Diagnostics", run: function () { push(DiagView()); } },
     { label: "Exit", run: function () { try { window.close(); } catch (e) {} } },
