@@ -7,10 +7,10 @@
     {
       "folder": "WhereAmI",
       "name": "WhereAmI",
-      "version": "1.5",
+      "version": "1.6",
       "category": "Utilities",
       "description": "Background location pinger",
-      "sha256": "fbc5c746c2d081034a793b6adaef7ef59cc455c567e4f5f7c73e91992c73a8e6"
+      "sha256": "62205c62a34461e3d9fbebfe7771d592f8b9a08a0eed8739ef096ea00aed8300"
     }
   ]
 }

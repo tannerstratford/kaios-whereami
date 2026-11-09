@@ -10,18 +10,19 @@
   "scope": "/",
   "orientation": "portrait",
   "id": "whereami",
-  "version": "1.5",
+  "version": "1.6",
   "icons": [
     { "src": "/icons/icon_56.png", "type": "image/png", "sizes": "56x56" },
     { "src": "/icons/icon_112.png", "type": "image/png", "sizes": "112x112" }
   ],
   "b2g_features": {
     "focus_color": "#2f6fed",
-    "version": "1.5",
+    "version": "1.6",
     "origin": "whereami",
     "serviceworker": { "script_url": "service_worker.js" },
     "messages": ["alarm"],
     "permissions": {
+      "device-storage:sdcard": { "access": "readwrite" },
       "geolocation": {},
       "alarms": {},
       "systemXHR": {}

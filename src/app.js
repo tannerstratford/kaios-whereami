@@ -244,6 +244,7 @@ function DiagView() {
     "serviceWorker: " + ("serviceWorker" in navigator),
     "mozSystem XHR: ok",
     "bg relaunch mode: " + bgMode,
+    "backup: " + backupState,
   ];
   var last = Tracker.lastResult();
   if (last) lines.push("last: " + (last.ok ? ("ok " + last.mode) : ("ERR " + last.error)));
@@ -260,10 +261,55 @@ function registerSW() {
   });
 }
 
+var backup = new FileBackup("whereami", navigator);
+var backupState = "not checked";
+
+function saveBackup(c) {
+  if (!c.writeToken && !c.readToken) return;
+  backup.save({
+    apiBase: c.apiBase, writeToken: c.writeToken, readToken: c.readToken,
+    enabled: c.enabled, idleSec: c.idleSec
+  }).then(function (wrote) {
+    backupState = wrote ? "saved" : (backupState === "not checked" ? "up to date" : backupState);
+  }, function (e) {
+    backupState = "FAILED " + (e && (e.name || e.message) || e);
+    status("Backup failed — see Diagnostics");
+  });
+}
+
+function restoreIfEmpty() {
+  var c = Tracker.loadConfig();
+  if (c.writeToken || c.readToken) return Promise.resolve(false);
+  return backup.load().then(function (d) {
+    backupState = d ? "restored" : "none found " + (backup.problems || []).join(",");
+    if (!d) return false;
+    Object.keys(d).forEach(function (k) { c[k] = d[k]; });
+    Tracker.saveConfig(c);
+    return true;
+  }, function (e) {
+    backupState = "read failed " + (e && (e.name || e.message) || e);
+    return false;
+  });
+}
+
 (function start() {
   registerSW();
   viewStack = [HomeView];
   show();
+  if (bgMode) { afterRestore(); return; }
+  restoreIfEmpty().then(function () {
+    enableBackup();
+    show();
+    afterRestore();
+  });
+}());
+
+function enableBackup() {
+  window.onConfigSaved = saveBackup;
+  saveBackup(Tracker.loadConfig());
+}
+
+function afterRestore() {
   var cfg = Tracker.loadConfig();
   if (bgMode) {
     // Relaunched by the SW alarm: ping and (doPing) self-close.
@@ -275,4 +321,4 @@ function registerSW() {
   } else {
     status("Tracking off — Menu to set up");
   }
-}());
+}

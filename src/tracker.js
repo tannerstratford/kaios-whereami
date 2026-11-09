@@ -41,7 +41,7 @@
       r.send();
     });
   }
-  function saveConfig(c) { saveJSON(CFG_KEY, c); }
+  function saveConfig(c) { saveJSON(CFG_KEY, c); if (root.onConfigSaved) root.onConfigSaved(c); }
 
   function getState() { return loadJSON(STATE_KEY, Cadence.initialState()); }
   function setState(s) { saveJSON(STATE_KEY, s); }
