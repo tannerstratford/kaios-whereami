@@ -10,13 +10,13 @@
   "scope": "/",
   "orientation": "portrait",
   "id": "whereami",
-  "version": "1.3",
+  "version": "1.4",
   "icons": [
     { "src": "/icons/icon_56.png", "type": "image/png", "sizes": "56x56" },
     { "src": "/icons/icon_112.png", "type": "image/png", "sizes": "112x112" }
   ],
   "b2g_features": {
-    "version": "1.3",
+    "version": "1.4",
     "origin": "whereami",
     "serviceworker": { "script_url": "service_worker.js" },
     "messages": ["alarm"],
