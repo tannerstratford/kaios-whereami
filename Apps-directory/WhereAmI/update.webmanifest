@@ -1,12 +1,13 @@
 {
   "name": "WhereAmI",
-  "version": "1.4",
+  "version": "1.5",
   "package_path": "https://tannerstratford.github.io/kaios-whereami/Apps-directory/WhereAmI/application.zip",
-  "packaged_size": 20928,
-  "size": 20928,
+  "packaged_size": 20944,
+  "size": 20944,
   "type": "web",
   "b2g_features": {
-    "version": "1.4",
+    "focus_color": "#2f6fed",
+    "version": "1.5",
     "origin": "whereami",
     "serviceworker": {
       "script_url": "service_worker.js"
